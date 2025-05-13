@@ -8,7 +8,7 @@
     body {
       margin: 0;
       font-family: 'Noto Sans SC', 'Noto Sans JP', 'Noto Sans', sans-serif;
-      background: url('your-background-image.jpg') no-repeat center center fixed;
+      background: url('https://drive.google.com/uc?id=1Tx6KVR6yLup25fEBQR3_2eIdJeC55Cyn') no-repeat center center fixed;
       background-size: cover;
       display: flex;
       flex-direction: column;
@@ -21,7 +21,7 @@
       display: none;
       padding: 2rem;
       opacity: 0;
-      transition: opacity 0.8s ease;
+      transition: opacity 0.5s ease; /* フェードイン・アウトの速さを0.05秒に設定 */
     }
     .page.active {
       display: block;
@@ -101,8 +101,7 @@
   </div>
 
   <!-- Page 2: Thank You -->
-  <div id="page2" class="page">
-    <div class="overlay-box">
+  <div id="page2" class="page" style="background: url('https://drive.google.com/uc?id=1E-nLMWcO0hU09Tx73fgja7zLyqP0-tju') no-repeat center center fixed; background-size: cover;"><div class="overlay-box">
       <h2 class="question-text">
          Thank you for your feedback!<br />
          感谢您的反馈！<br />
@@ -113,31 +112,35 @@
 
   <script>
     function submitFeedback(level) {
-      const scriptURL = 'https://script.google.com/macros/library/d/1_MaM8muZfvtECUWQCXCaELJXzzmMkSuFbdorl55qApDBR3A6diHWL9wV/4';
+      const scriptURL = 'https://script.google.com/macros/s/AKfycbxE_jVRtnzhprzVsyzqX6APkEyAjrFI-eUjwE8X4mwIK3clJefVH4eDsuVvvjMtvDFl2A/exec';
       const data = new FormData();
       data.append('timestamp', new Date().toISOString());
       data.append('crowd_level', level);
 
+      // UI即時切り替え
+      fadeOut('page1');
+      fadeIn('page2');
+      // Thank You画面を表示し続ける時間（2秒）
+        setTimeout(() => {
+          fadeOut('page2');
+        // Thank You画面から質問画面に戻すまでの待機時間（0.2秒）
+        setTimeout(() => fadeIn('page1'), 200);
+      }, 2000);
+
+      // 非同期に送信
       fetch(scriptURL, { method: 'POST', body: data })
-        .then(response => {
-          fadeOut('page1');
-          setTimeout(() => {
-            fadeIn('page2');
-            setTimeout(() => {
-              fadeOut('page2');
-              setTimeout(() => fadeIn('page1'), 800);
-            }, 2500);
-          }, 1000);
-        })
+        .then(response => console.log("✅ fetch成功"))
         .catch(error => {
-          alert('Error occurred: ' + error.message);
+          console.error("❌ fetchエラー:", error);
+          // alert なし：UXを壊さないため
         });
     }
 
     function fadeOut(id) {
       const el = document.getElementById(id);
       el.style.opacity = 0;
-      setTimeout(() => el.classList.remove('active'), 800);
+      // フェードアウト完了後に要素を非表示にするまでの待機時間（0.05秒）
+      setTimeout(() => el.classList.remove('active'), 500);
     }
 
     function fadeIn(id) {
