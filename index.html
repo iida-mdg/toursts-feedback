@@ -8,8 +8,14 @@
     body {
       margin: 0;
       font-family: 'Noto Sans SC', 'Noto Sans JP', 'Noto Sans', sans-serif;
-      background: url('https://drive.google.com/uc?export=view&id=10J47pE40amb7D-QAGC3x_mSFoX5TrmE1') no-repeat center center fixed;
-      background-size: cover;
+      background: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+    
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -83,7 +89,7 @@
 </head>
 <body>
   <!-- Page 1: Question -->
-  <div id="page1" class="page active">
+  <div id="page1" class="page active" style="background: url('https://drive.google.com/uc?export=view&id=10J47pE40amb7D-QAGC3x_mSFoX5TrmE1') no-repeat center center fixed; background-size: cover;">
     <div class="overlay-box">
       <h2 class="question-text">
         How crowded does it feel right now for you?<br />
