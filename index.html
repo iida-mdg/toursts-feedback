@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crowd Feedback Survey</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Noto Sans SC', 'Noto Sans JP', 'Noto Sans', sans-serif;
+      background: url('your-background-image.jpg') no-repeat center center fixed;
+      background-size: cover;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+    }
+    .page {
+      display: none;
+      padding: 2rem;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+    .page.active {
+      display: block;
+      opacity: 1;
+    }
+    .overlay-box {
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 2rem;
+      border-radius: 1rem;
+      margin-bottom: 2rem;
+      max-width: 90vw;
+    }
+    .question-text {
+      color: #ffffff;
+      font-size: 1.6em;
+      line-height: 1.6;
+    }
+    .button-container {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 1rem;
+      border-radius: 1rem;
+      max-width: 90vw;
+    }
+    .button {
+      width: 100px;
+      height: 100px;
+      font-size: 0.85em;
+      font-weight: bold;
+      border: none;
+      border-radius: 16px;
+      color: #000000;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 0.5rem;
+      line-height: 1.4em;
+      flex-direction: column;
+    }
+    .btn-1 { background-color: #5271ff; }
+    .btn-2 { background-color: #7ed957; }
+    .btn-3 { background-color: #ffde59; }
+    .btn-4 { background-color: #ff914d; }
+    .btn-5 { background-color: #ff3131; }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans&family=Noto+Sans+JP&family=Noto+Sans+SC&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Page 1: Question -->
+  <div id="page1" class="page active">
+    <div class="overlay-box">
+      <h2 class="question-text">
+        How crowded does it feel right now for you?<br />
+        您觉得现在这里人多吗？<br />
+        現在の混雑具合をどう感じますか？
+      </h2>
+    </div>
+    <div class="button-container">
+      <button class="button btn-1" onclick="submitFeedback(1)">Too few<br />人太少了<br />少なすぎる</button>
+      <button class="button btn-2" onclick="submitFeedback(2)">Few<br />人有点少<br />少ない</button>
+      <button class="button btn-3" onclick="submitFeedback(3)">Just right<br />正好<br />ちょうどいい</button>
+      <button class="button btn-4" onclick="submitFeedback(4)">Many<br />有点多<br />多い</button>
+      <button class="button btn-5" onclick="submitFeedback(5)">Too many<br />太多了<br />多すぎる</button>
+    </div>
+  </div>
+
+  <!-- Page 2: Thank You -->
+  <div id="page2" class="page">
+    <div class="overlay-box">
+      <h2 class="question-text">
+         Thank you for your feedback!<br />
+         感谢您的反馈！<br />
+         ご協力ありがとうございました！
+      </h2>
+    </div>
+  </div>
+
+  <script>
+    function submitFeedback(level) {
+      const scriptURL = 'YOUR_GOOGLE_APPS_SCRIPT_WEBAPP_URL';
+      const data = new FormData();
+      data.append('timestamp', new Date().toISOString());
+      data.append('crowd_level', level);
+
+      fetch(scriptURL, { method: 'POST', body: data })
+        .then(response => {
+          fadeOut('page1');
+          setTimeout(() => {
+            fadeIn('page2');
+            setTimeout(() => {
+              fadeOut('page2');
+              setTimeout(() => fadeIn('page1'), 800);
+            }, 2000);
+          }, 800);
+        })
+        .catch(error => {
+          alert('Error occurred: ' + error.message);
+        });
+    }
+
+    function fadeOut(id) {
+      const el = document.getElementById(id);
+      el.style.opacity = 0;
+      setTimeout(() => el.classList.remove('active'), 800);
+    }
+
+    function fadeIn(id) {
+      const el = document.getElementById(id);
+      el.classList.add('active');
+      setTimeout(() => el.style.opacity = 1, 10);
+    }
+  </script>
+</body>
+</html>
