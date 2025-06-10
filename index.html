@@ -1,14 +1,88 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Crowd Feedback Survey</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Noto Sans SC', 'Noto Sans JP', 'Noto Sans', sans-serif;
+      background: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+    }
+    .page {
+      display: none;
+      padding: 2rem;
+      opacity: 0;
+      transition: opacity 0.5s ease; /* フェードイン・アウトの速さを0.05秒に設定 */
+    }
+    .page.active {
+      display: block;
+      opacity: 1;
+    }
+    .overlay-box {
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 2rem;
+      border-radius: 1rem;
+      margin-bottom: 2rem;
+      max-width: 90vw;
+    }
+    .question-text {
+      color: #ffffff;
+      font-size: 2.4em;
+      line-height: 1.8;
+    }
+    #page2 .question-text {
+      font-size: 3em;
+    }
+    .button-container {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 1rem;
+      border-radius: 1rem;
+      max-width: 90vw;
+    }
+    .button {
+      width: 160px; /* 回答ボタンの横幅を拡大 */
+      height: 160px; /* 回答ボタンの縦幅を拡大 */
+      font-size: 1.4em; /* 回答ボタン内の文字サイズを拡大 */
+      font-weight: bold;
+      border: none;
+      border-radius: 16px;
+      color: #000000;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 0.5rem;
+      line-height: 1.6em;
+      flex-direction: column;
+      transition: transform 0.1s ease;
+    }
+    .button:active {
+      transform: scale(0.95);
+    }
+    .btn-1 { background-color: #5271ff; }
+    .btn-2 { background-color: #7ed957; }
+    .btn-3 { background-color: #ffde59; }
+    .btn-4 { background-color: #ff914d; }
+    .btn-5 { background-color: #ff3131; }
+  </style>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans&family=Noto+Sans+JP&family=Noto+Sans+SC&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="page1" class="page active">
+  <!-- Page 1: Question -->
+  <div id="page1" class="page active" style="background: url('https://iida-mdg.github.io/toursts-feedback/background1.jpg') no-repeat center center fixed; background-size: contain;">
     <div class="overlay-box">
       <h2 class="question-text">
         How crowded does it feel right now for you?<br />
@@ -25,16 +99,54 @@
     </div>
   </div>
 
-  <div id="page2" class="page">
-    <div class="overlay-box">
+  <!-- Page 2: Thank You -->
+  <div id="page2" class="page" style="background: url('https://iida-mdg.github.io/toursts-feedback/background2.jpg') no-repeat center center fixed; background-size: cover;"><div class="overlay-box">
       <h2 class="question-text">
-        Thank you for your feedback!<br />
-        感谢您的反馈！<br />
-        ご協力ありがとうございました！
+         Thank you for your feedback!<br />
+         感谢您的反馈！<br />
+         ご協力ありがとうございました！
       </h2>
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <script>
+    function submitFeedback(level) {
+      const scriptURL = 'https://script.google.com/macros/s/AKfycbxE_jVRtnzhprzVsyzqX6APkEyAjrFI-eUjwE8X4mwIK3clJefVH4eDsuVvvjMtvDFl2A/exec';
+      const data = new FormData();
+      data.append('timestamp', new Date().toISOString());
+      data.append('crowd_level', level);
+
+      // UI即時切り替え
+      fadeOut('page1');
+      fadeIn('page2');
+      // Thank You画面を表示し続ける時間（2秒）
+        setTimeout(() => {
+          fadeOut('page2');
+        // Thank You画面から質問画面に戻すまでの待機時間（0.2秒）
+        setTimeout(() => fadeIn('page1'), 200);
+      }, 2000);
+
+      // 非同期に送信
+      fetch(scriptURL, { method: 'POST', body: data })
+        .then(response => console.log("✅ fetch成功"))
+        .catch(error => {
+          console.error("❌ fetchエラー:", error);
+          // alert なし：UXを壊さないため
+        });
+    }
+
+    function fadeOut(id) {
+      const el = document.getElementById(id);
+      el.style.opacity = 0;
+      // フェードアウト完了後に要素を非表示にするまでの待機時間（0.05秒）
+      setTimeout(() => el.classList.remove('active'), 500);
+    }
+
+    function fadeIn(id) {
+      const el = document.getElementById(id);
+      el.classList.add('active');
+      setTimeout(() => el.style.opacity = 1, 10);
+    }
+  </script>
 </body>
 </html>
