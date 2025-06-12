@@ -20,12 +20,18 @@
       position: absolute; top: 0; left: 0; width: 100%; height: 100%;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       opacity: 0;
-      /* ▼▼▼ 変更点: アニメーションの速度を一定にして暗転を防ぐ ▼▼▼ */
-      transition: opacity 0.5s linear;
+      /* ▼▼▼ 変更点: easeに戻し、z-indexを追加 ▼▼▼ */
+      transition: opacity 0.5s ease; /* 見た目が滑らかなeaseに戻します */
       visibility: hidden;
       will-change: opacity;
+      z-index: 1; /* 基本の重なり順を1に */
     }
-    .page.active { opacity: 1; visibility: visible; }
+    .page.active {
+      opacity: 1;
+      visibility: visible;
+      z-index: 2; /* アクティブなページは手前(z-index: 2)に表示 */
+    }
+    /* ... これ以降のCSSは変更ありません ... */
     #page1 {}
     #page2 {
       background-image: url('https://iida-mdg.github.io/toursts-feedback/background-thankyou.jpg');
@@ -59,57 +65,57 @@
 <body ontouchstart="">
   <div id="page1" class="page active">
     <div class="background-slideshow">
-      <div class="slide"></div>
-      <div class="slide"></div>
-      <div class="slide"></div>
-      <div class="slide"></div>
+      <div class="slide"></div><div class="slide"></div><div class="slide"></div><div class="slide"></div>
     </div>
-    <div class="overlay-box">
-      <h2 class="question-text">
-        How crowded does it feel right now for you?<br />
-        您觉得现在这里人多吗？<br />
-        現在の混雑具合をどう感じますか？
-      </h2>
-    </div>
-    <div class="button-container">
-      <button class="button btn-1" onclick="submitFeedback(1)">Too few<br />人太少了<br />少なすぎる</button>
-      <button class="button btn-2" onclick="submitFeedback(2)">Few<br />人有点少<br />少ない</button>
-      <button class="button btn-3" onclick="submitFeedback(3)">Just right<br />正好<br />ちょうどいい</button>
-      <button class="button btn-4" onclick="submitFeedback(4)">Many<br />有点多<br />多い</button>
-      <button class="button btn-5" onclick="submitFeedback(5)">Too many<br />太多了<br />多すぎる</button>
-    </div>
+    <div class="overlay-box"><h2 class="question-text">How crowded does it feel right now for you?<br />您觉得现在这里人多吗？<br />現在の混雑具合をどう感じますか？</h2></div>
+    <div class="button-container"><button class="button btn-1" onclick="submitFeedback(1)">Too few<br />人太少了<br />少なすぎる</button><button class="button btn-2" onclick="submitFeedback(2)">Few<br />人有点少<br />少ない</button><button class="button btn-3" onclick="submitFeedback(3)">Just right<br />正好<br />ちょうどいい</button><button class="button btn-4" onclick="submitFeedback(4)">Many<br />有点多<br />多い</button><button class="button btn-5" onclick="submitFeedback(5)">Too many<br />太多了<br />多すぎる</button></div>
   </div>
   <div id="page2" class="page">
-    <div class="overlay-box">
-      <h2 class="question-text">
-        Thank you for your feedback!<br />
-        感谢您的反馈！<br />
-        ご協力ありがとうございました！
-      </h2>
-    </div>
+    <div class="overlay-box"><h2 class="question-text">Thank you for your feedback!<br />感谢您的反馈！<br />ご協力ありがとうございました！</h2></div>
   </div>
   
   <script>
     const DURATION_THANKYOU_PAGE = 2000;
     const page1 = document.getElementById('page1');
     const page2 = document.getElementById('page2');
+
+    // ▼▼▼ 変更点: JavaScriptのロジックを全面的に変更 ▼▼▼
     function submitFeedback(level) {
       setTimeout(() => {
+        // --- データ送信処理は変更なし ---
         const scriptURL = 'https://script.google.com/macros/s/AKfycbxE_jVRtnzhprzVsyzqX6APkEyAjrFI-eUjwE8X4mwIK3clJefVH4eDsuVvvjMtvDFl2A/exec';
         const data = new FormData();
         data.append('timestamp', new Date().toISOString());
         data.append('crowd_level', level);
-        page1.classList.remove('active');
-        page2.classList.add('active');
-        setTimeout(() => {
-          page2.classList.remove('active');
-          page1.classList.add('active');
-        }, DURATION_THANKYOU_PAGE);
         fetch(scriptURL, { method: 'POST', body: data })
           .then(response => console.log("✅ Data sent successfully."))
-          .catch(error => {
-            console.error("❌ Error sending data:", error);
-          });
+          .catch(error => console.error("❌ Error sending data:", error));
+
+        // --- 画面1 → 2への遷移ロジック ---
+        // page2をアクティブにして、page1の上に重ねてフェードインさせる
+        page2.classList.add('active');
+        
+        // page2のフェードイン完了後、裏側にあるpage1を非アクティブにする
+        const onPage2FadedIn = () => {
+          page1.classList.remove('active');
+          page2.removeEventListener('transitionend', onPage2FadedIn);
+        };
+        page2.addEventListener('transitionend', onPage2FadedIn);
+
+        // --- 画面2 → 1への遷移ロジック ---
+        // 「ありがとう」ページを表示した後…
+        setTimeout(() => {
+          // page1をアクティブにして、page2の上に重ねてフェードインさせる
+          page1.classList.add('active');
+
+          // page1のフェードイン完了後、裏側にあるpage2を非アクティブにする
+          const onPage1FadedIn = () => {
+            page2.classList.remove('active');
+            page1.removeEventListener('transitionend', onPage1FadedIn);
+          };
+          page1.addEventListener('transitionend', onPage1FadedIn);
+        }, DURATION_THANKYOU_PAGE);
+
       }, 150);
     }
   </script>
