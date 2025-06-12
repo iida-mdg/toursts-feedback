@@ -12,10 +12,13 @@
       height: 100vh;
       overflow: hidden;
       font-family: 'Noto Sans SC', 'Noto Sans JP', 'Noto Sans', sans-serif;
+      /* 変更点: 保険として、隙間が見えても真っ黒になるように背景色を指定 */
+      background-color: #000;
     }
     body {
       position: relative;
     }
+    /* ...（これ以降のCSSは変更ありません）... */
     .page {
       position: absolute;
       top: 0;
@@ -28,12 +31,10 @@
       justify-content: center;
       background-position: center center;
       background-repeat: no-repeat;
-      /* background-attachment: fixed; を削除して描画負荷を軽減 */
       background-size: cover;
       opacity: 0;
       transition: opacity 0.5s ease;
       visibility: hidden;
-      /* 変更点: アニメーションの準備をさせてラグを軽減 */
       will-change: opacity;
     }
     .page.active {
@@ -89,7 +90,6 @@
       line-height: 1.6em;
       flex-direction: column;
       transition: transform 0.1s ease;
-      /* 変更点: アニメーションの準備をさせてラグを軽減 */
       will-change: transform;
     }
     .button:active {
@@ -129,25 +129,42 @@
       </h2>
     </div>
   </div>
+
   <script>
     const DURATION_THANKYOU_PAGE = 2000;
-    const DURATION_FADE_TRANSITION = 500;
     const page1 = document.getElementById('page1');
     const page2 = document.getElementById('page2');
+
     function submitFeedback(level) {
       setTimeout(() => {
         const scriptURL = 'https://script.google.com/macros/s/AKfycbxE_jVRtnzhprzVsyzqX6APkEyAjrFI-eUjwE8X4mwIK3clJefVH4eDsuVvvjMtvDFl2A/exec';
         const data = new FormData();
         data.append('timestamp', new Date().toISOString());
         data.append('crowd_level', level);
+
         page1.classList.remove('active');
         page2.classList.add('active');
+
+        // --- 変更点: ここから ---
+        // 「ありがとう」ページを表示した後の処理
         setTimeout(() => {
-          page2.classList.remove('active');
-          setTimeout(() => {
+          // transitionendイベントリスナーを定義
+          // これは「アニメーションが終わったら」を意味する
+          const onPage2FadedOut = () => {
+            // 画面1を表示する
             page1.classList.add('active');
-          }, DURATION_FADE_TRANSITION + 50);
+            // 一度使ったイベントリスナーは削除する
+            page2.removeEventListener('transitionend', onPage2FadedOut);
+          };
+
+          // 画面2に「アニメーションが終わったらonPage2FadedOutを実行する」ように指示
+          page2.addEventListener('transitionend', onPage2FadedOut);
+          // 画面2のフェードアウトを開始
+          page2.classList.remove('active');
+
         }, DURATION_THANKYOU_PAGE);
+        // --- 変更点: ここまで ---
+
         fetch(scriptURL, { method: 'POST', body: data })
           .then(response => console.log("✅ Data sent successfully."))
           .catch(error => {
