@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Crowd Feedback Survey</title>
   <style>
-    /* ...（前回のCSSから変更なし）... */
     html, body {
       margin: 0;
       padding: 0;
@@ -29,11 +28,13 @@
       justify-content: center;
       background-position: center center;
       background-repeat: no-repeat;
-      background-attachment: fixed;
+      /* background-attachment: fixed; を削除して描画負荷を軽減 */
       background-size: cover;
       opacity: 0;
       transition: opacity 0.5s ease;
       visibility: hidden;
+      /* 変更点: アニメーションの準備をさせてラグを軽減 */
+      will-change: opacity;
     }
     .page.active {
       opacity: 1;
@@ -88,6 +89,8 @@
       line-height: 1.6em;
       flex-direction: column;
       transition: transform 0.1s ease;
+      /* 変更点: アニメーションの準備をさせてラグを軽減 */
+      will-change: transform;
     }
     .button:active {
       transform: scale(0.95);
@@ -117,7 +120,6 @@
       <button class="button btn-5" onclick="submitFeedback(5)">Too many<br />太多了<br />多すぎる</button>
     </div>
   </div>
-
   <div id="page2" class="page">
     <div class="overlay-box">
       <h2 class="question-text">
@@ -127,44 +129,31 @@
       </h2>
     </div>
   </div>
-
   <script>
     const DURATION_THANKYOU_PAGE = 2000;
     const DURATION_FADE_TRANSITION = 500;
-    
     const page1 = document.getElementById('page1');
     const page2 = document.getElementById('page2');
-
     function submitFeedback(level) {
-      // --- 変更点: ここから ---
-      // ボタンが縮むアニメーションを見せるため、ページ遷移処理全体を
-      // わずかに（0.15秒）遅らせる
       setTimeout(() => {
         const scriptURL = 'https://script.google.com/macros/s/AKfycbxE_jVRtnzhprzVsyzqX6APkEyAjrFI-eUjwE8X4mwIK3clJefVH4eDsuVvvjMtvDFl2A/exec';
         const data = new FormData();
         data.append('timestamp', new Date().toISOString());
         data.append('crowd_level', level);
-
-        // UIを切り替え
         page1.classList.remove('active');
         page2.classList.add('active');
-
-        // 一定時間後にThank You画面を消し、質問画面に戻す
         setTimeout(() => {
           page2.classList.remove('active');
           setTimeout(() => {
             page1.classList.add('active');
           }, DURATION_FADE_TRANSITION + 50);
         }, DURATION_THANKYOU_PAGE);
-
-        // Google Apps Scriptへ非同期にデータを送信
         fetch(scriptURL, { method: 'POST', body: data })
           .then(response => console.log("✅ Data sent successfully."))
           .catch(error => {
             console.error("❌ Error sending data:", error);
           });
-      }, 150); // 0.15秒待ってから処理を開始
-      // --- 変更点: ここまで ---
+      }, 150);
     }
   </script>
 </body>
