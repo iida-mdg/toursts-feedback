@@ -20,7 +20,8 @@
       display: none;
       padding: 2rem;
       opacity: 0;
-      transition: opacity 0.5s ease; /* フェードイン・アウトの速さを0.05秒に設定 */
+      /* フェードイン・アウトの速さを0.5秒に設定 */
+      transition: opacity 0.5s ease;
     }
     .page.active {
       display: block;
@@ -81,8 +82,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans&family=Noto+Sans+JP&family=Noto+Sans+SC&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!-- Page 1: Question -->
-  <div id="page1" class="page active" style="background: url('https://iida-mdg.github.io/toursts-feedback/background1.jpg') no-repeat center center fixed; background-size: contain;">
+  <div id="page1" class="page active" style="background: url('https://iida-mdg.github.io/toursts-feedback/background1.jpg') no-repeat center center fixed; background-size: cover;">
     <div class="overlay-box">
       <h2 class="question-text">
         How crowded does it feel right now for you?<br />
@@ -99,55 +99,61 @@
     </div>
   </div>
 
-  <!-- Page 2: Thank You -->
-  <div id="page2" class="page" style="background: url('https://iida-mdg.github.io/toursts-feedback/background2.jpg') no-repeat center center fixed; background-size: cover;"><div class="overlay-box">
+  <div id="page2" class="page" style="background: url('https://iida-mdg.github.io/toursts-feedback/background2.jpg') no-repeat center center fixed; background-size: cover;">
+    <div class="overlay-box">
       <h2 class="question-text">
-         Thank you for your feedback!<br />
-         感谢您的反馈！<br />
-         ご協力ありがとうございました！
+        Thank you for your feedback!<br />
+        感谢您的反馈！<br />
+        ご協力ありがとうございました！
       </h2>
     </div>
   </div>
 
   <script>
+    // 時間設定を定数として定義
+    const DURATION_THANKYOU_PAGE = 2000;      // サンキュー画面の表示時間 (2秒)
+    const DURATION_FADE_TRANSITION = 500;   // CSSのtransitionと合わせたフェード時間 (0.5秒)
+    const DELAY_RETURN_TO_QUESTION = 200;   // 質問画面に戻る前の待ち時間 (0.2秒)
+    const FADE_IN_TRIGGER_DELAY = 10;         // fadeInを発火させるための僅かな遅延 (0.01秒)
+
     function submitFeedback(level) {
       const scriptURL = 'https://script.google.com/macros/s/AKfycbxE_jVRtnzhprzVsyzqX6APkEyAjrFI-eUjwE8X4mwIK3clJefVH4eDsuVvvjMtvDFl2A/exec';
       const data = new FormData();
       data.append('timestamp', new Date().toISOString());
       data.append('crowd_level', level);
 
-      // UI即時切り替え
+      // UIを即座に切り替え
       fadeOut('page1');
       fadeIn('page2');
-      // Thank You画面を表示し続ける時間（2秒）
-        setTimeout(() => {
-          fadeOut('page2');
-        // Thank You画面から質問画面に戻すまでの待機時間（0.2秒）
-        setTimeout(() => fadeIn('page1'), 200);
-      }, 2000);
 
-      // 非同期に送信
+      // 一定時間後にThank You画面を消し、質問画面に戻す
+      setTimeout(() => {
+        fadeOut('page2');
+        setTimeout(() => fadeIn('page1'), DELAY_RETURN_TO_QUESTION);
+      }, DURATION_THANKYOU_PAGE);
+
+      // Google Apps Scriptへ非同期にデータを送信
       fetch(scriptURL, { method: 'POST', body: data })
-        .then(response => console.log("✅ fetch成功"))
+        .then(response => console.log("✅ Data sent successfully."))
         .catch(error => {
-          console.error("❌ fetchエラー:", error);
-          // alert なし：UXを壊さないため
+          console.error("❌ Error sending data:", error);
+          // ユーザーの操作を妨げないようにアラートは表示しない
         });
     }
 
     function fadeOut(id) {
       const el = document.getElementById(id);
       el.style.opacity = 0;
-      // フェードアウト完了後に要素を非表示にするまでの待機時間（0.05秒）
-      setTimeout(() => el.classList.remove('active'), 500);
+      // フェードアウトのアニメーション完了後に要素を非表示にする
+      setTimeout(() => el.classList.remove('active'), DURATION_FADE_TRANSITION);
     }
 
     function fadeIn(id) {
       const el = document.getElementById(id);
       el.classList.add('active');
-      setTimeout(() => el.style.opacity = 1, 10);
+      // activeクラスを付与(display: block)した直後にopacityを変更し、transitionを発火させる
+      setTimeout(() => el.style.opacity = 1, FADE_IN_TRIGGER_DELAY);
     }
   </script>
 </body>
 </html>
-
