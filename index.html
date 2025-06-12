@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Crowd Feedback Survey</title>
-
   <link rel="preload" as="image" href="https://iida-mdg.github.io/toursts-feedback/background1.jpg">
   <link rel="preload" as="image" href="https://iida-mdg.github.io/toursts-feedback/background2.jpg">
   <link rel="preload" as="image" href="https://iida-mdg.github.io/toursts-feedback/background3.jpg">
@@ -13,86 +12,38 @@
   <style>
     /* CSSは変更ありません */
     html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100vh;
-      overflow: hidden;
-      font-family: 'Noto Sans SC', 'Noto Sans JP', 'Noto Sans', sans-serif;
+      margin: 0; padding: 0; width: 100%; height: 100vh;
+      overflow: hidden; font-family: 'Noto Sans SC', 'Noto Sans JP', 'Noto Sans', sans-serif;
       background-color: #000;
     }
-    body {
-      position: relative;
-    }
+    body { position: relative; }
     .page {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      transition: opacity 0.5s ease;
-      visibility: hidden;
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.5s ease; visibility: hidden;
       will-change: opacity;
     }
-    .page.active {
-      opacity: 1;
-      visibility: visible;
-    }
+    .page.active { opacity: 1; visibility: visible; }
     #page1 {}
     #page2 {
       background-image: url('https://iida-mdg.github.io/toursts-feedback/background-thankyou.jpg');
-      background-position: center center;
-      background-repeat: no-repeat;
-      background-size: cover;
+      background-position: center center; background-repeat: no-repeat; background-size: cover;
     }
     .background-slideshow {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
     }
     .slide {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background-position: center center;
-      background-repeat: no-repeat;
-      background-size: cover;
-      opacity: 0;
-      animation-name: fadeEffect;
-      animation-iteration-count: infinite;
-      animation-duration: 20s;
+      position: absolute; width: 100%; height: 100%;
+      background-position: center center; background-repeat: no-repeat; background-size: cover;
+      opacity: 0; animation-name: fadeEffect; animation-iteration-count: infinite; animation-duration: 20s;
     }
     @keyframes fadeEffect {
-      0% { opacity: 0; }
-      10% { opacity: 1; }
-      40% { opacity: 1; }
-      50% { opacity: 0; }
-      100% { opacity: 0; }
+      0% { opacity: 0; } 10% { opacity: 1; } 40% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 0; }
     }
-    .slide:nth-child(1) {
-      background-image: url('https://iida-mdg.github.io/toursts-feedback/background1.jpg');
-      animation-delay: 0s;
-    }
-    .slide:nth-child(2) {
-      background-image: url('https://iida-mdg.github.io/toursts-feedback/background2.jpg');
-      animation-delay: 5s;
-    }
-    .slide:nth-child(3) {
-      background-image: url('https://iida-mdg.github.io/toursts-feedback/background3.jpg');
-      animation-delay: 10s;
-    }
-    .slide:nth-child(4) {
-      background-image: url('https://iida-mdg.github.io/toursts-feedback/background4.jpg');
-      animation-delay: 15s;
-    }
+    .slide:nth-child(1) { background-image: url('https://iida-mdg.github.io/toursts-feedback/background1.jpg'); animation-delay: 0s; }
+    .slide:nth-child(2) { background-image: url('https://iida-mdg.github.io/toursts-feedback/background2.jpg'); animation-delay: 5s; }
+    .slide:nth-child(3) { background-image: url('https://iida-mdg.github.io/toursts-feedback/background3.jpg'); animation-delay: 10s; }
+    .slide:nth-child(4) { background-image: url('https://iida-mdg.github.io/toursts-feedback/background4.jpg'); animation-delay: 15s; }
     .overlay-box { background-color: rgba(0, 0, 0, 0.7); padding: 2rem; border-radius: 1rem; margin-bottom: 2rem; max-width: 90vw; text-align: center; }
     .question-text { color: #ffffff; font-size: 2.4em; line-height: 1.8; }
     #page2 .question-text { font-size: 3em; }
@@ -135,26 +86,33 @@
       </h2>
     </div>
   </div>
+  
   <script>
     const DURATION_THANKYOU_PAGE = 2000;
     const page1 = document.getElementById('page1');
     const page2 = document.getElementById('page2');
+
     function submitFeedback(level) {
       setTimeout(() => {
         const scriptURL = 'https://script.google.com/macros/s/AKfycbxE_jVRtnzhprzVsyzqX6APkEyAjrFI-eUjwE8X4mwIK3clJefVH4eDsuVvvjMtvDFl2A/exec';
         const data = new FormData();
         data.append('timestamp', new Date().toISOString());
         data.append('crowd_level', level);
+
+        // 画面1を消し、画面2を表示
         page1.classList.remove('active');
         page2.classList.add('active');
+
+        // 「ありがとう」ページを表示した後の処理
         setTimeout(() => {
-          const onPage2FadedOut = () => {
-            page1.classList.add('active');
-            page2.removeEventListener('transitionend', onPage2FadedOut);
-          };
-          page2.addEventListener('transitionend', onPage2FadedOut);
+          // ▼▼▼ 変更点: ここから ▼▼▼
+          // 複雑なtransitionendを待つ処理をやめ、
+          // 画面2を消すのと、画面1を表示するのを同時に行うことでクロスフェードさせる
           page2.classList.remove('active');
+          page1.classList.add('active');
+          // ▲▲▲ 変更点: ここまで ▲▲▲
         }, DURATION_THANKYOU_PAGE);
+
         fetch(scriptURL, { method: 'POST', body: data })
           .then(response => console.log("✅ Data sent successfully."))
           .catch(error => {
