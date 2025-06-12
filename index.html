@@ -1,72 +1,37 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Crowd Feedback Survey</title>
-  
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans&family=Noto+Sans+JP&family=Noto+Sans+SC&display=swap" rel="stylesheet">
-
   <style>
-    /* * 全体のスタイル設定
-     */
     body {
       margin: 0;
       font-family: 'Noto Sans SC', 'Noto Sans JP', 'Noto Sans', sans-serif;
-      background: #000; /* 背景画像が読み込まれるまでの黒背景 */
-      cursor: none; /* マウスカーソルを非表示にする */
-    }
-
-    /* * 各ページ（画面）の基本スタイル 
-     * ★がたつき解消の最重要ポイント！
-     */
-    .page {
-      /* ページを重ねて配置するための設定 */
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      box-sizing: border-box; /* paddingがサイズに影響しないようにするおまじない */
-
-      /* ページの中のコンテンツ（質問文やボタン）を中央揃えするための設定 */
+      background: none;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      
-      /* フェードイン・アウトのための設定 */
+      min-height: 100vh;
+      text-align: center;
+    }
+    .page {
+      display: none;
+      padding: 2rem;
       opacity: 0;
-      transition: opacity 0.5s ease;
-      
-      /* ★背景画像の黄金ルール */
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
+      transition: opacity 0.5s ease; /* フェードイン・アウトの速さを0.05秒に設定 */
     }
-
-    /* 表示されるページにだけ適用するスタイル */
     .page.active {
-      opacity: 1; /* 透明度を1にして表示する */
+      display: block;
+      opacity: 1;
     }
-    
-    /* IDごとの背景画像を指定 */
-    #page1 {
-      background-image: url('https://iida-mdg.github.io/toursts-feedback/background1.jpg');
-    }
-    #page2 {
-      background-image: url('https://iida-mdg.github.io/toursts-feedback/background2.jpg');
-    }
-
-    /* * コンテンツのスタイル 
-     */
     .overlay-box {
       background-color: rgba(0, 0, 0, 0.7);
       padding: 2rem;
       border-radius: 1rem;
       margin-bottom: 2rem;
       max-width: 90vw;
-      text-align: center;
     }
     .question-text {
       color: #ffffff;
@@ -87,9 +52,9 @@
       max-width: 90vw;
     }
     .button {
-      width: 160px;
-      height: 160px;
-      font-size: 1.4em;
+      width: 160px; /* 回答ボタンの横幅を拡大 */
+      height: 160px; /* 回答ボタンの縦幅を拡大 */
+      font-size: 1.4em; /* 回答ボタン内の文字サイズを拡大 */
       font-weight: bold;
       border: none;
       border-radius: 16px;
@@ -113,10 +78,11 @@
     .btn-4 { background-color: #ff914d; }
     .btn-5 { background-color: #ff3131; }
   </style>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans&family=Noto+Sans+JP&family=Noto+Sans+SC&display=swap" rel="stylesheet">
 </head>
 <body>
-
-  <div id="page1" class="page active">
+  <!-- Page 1: Question -->
+  <div id="page1" class="page active" style="background: url('https://iida-mdg.github.io/toursts-feedback/background1.jpg') no-repeat center center fixed; background-size: contain;">
     <div class="overlay-box">
       <h2 class="question-text">
         How crowded does it feel right now for you?<br />
@@ -133,53 +99,55 @@
     </div>
   </div>
 
-  <div id="page2" class="page">
-    <div class="overlay-box">
+  <!-- Page 2: Thank You -->
+  <div id="page2" class="page" style="background: url('https://iida-mdg.github.io/toursts-feedback/background2.jpg') no-repeat center center fixed; background-size: cover;"><div class="overlay-box">
       <h2 class="question-text">
-        Thank you for your feedback!<br />
-        感谢您的反馈！<br />
-        ご協力ありがとうございました！
+         Thank you for your feedback!<br />
+         感谢您的反馈！<br />
+         ご協力ありがとうございました！
       </h2>
     </div>
   </div>
 
   <script>
-    // Google Apps ScriptのURL（データを送る先）
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxE_jVRtnzhprzVsyzqX6APkEyAjrFI-eUjwE8X4mwIK3clJefVH4eDsuVvvjMtvDFl2A/exec';
-
-    // ボタンが押されたときに実行される関数
     function submitFeedback(level) {
-      // ユーザーの操作にすぐ反応するために、まず画面を切り替える
-      switchPage('page1', 'page2');
+      const scriptURL = 'https://script.google.com/macros/s/AKfycbxE_jVRtnzhprzVsyzqX6APkEyAjrFI-eUjwE8X4mwIK3clJefVH4eDsuVvvjMtvDFl2A/exec';
+      const data = new FormData();
+      data.append('timestamp', new Date().toISOString());
+      data.append('crowd_level', level);
 
-      // 2秒後に「ありがとう」画面から質問画面に自動で戻るタイマーを設定
-      setTimeout(() => {
-        switchPage('page2', 'page1');
-      }, 2000); 
+      // UI即時切り替え
+      fadeOut('page1');
+      fadeIn('page2');
+      // Thank You画面を表示し続ける時間（2秒）
+        setTimeout(() => {
+          fadeOut('page2');
+        // Thank You画面から質問画面に戻すまでの待機時間（0.2秒）
+        setTimeout(() => fadeIn('page1'), 200);
+      }, 2000);
 
-      // データをGoogleスプレッドシートに非同期で送信（バックグラウンドで実行）
-      const formData = new FormData();
-      formData.append('timestamp', new Date().toISOString());
-      formData.append('crowd_level', level);
-
-      fetch(SCRIPT_URL, { method: 'POST', body: formData })
-        .then(response => console.log("✅ データ送信成功"))
-        .catch(error => console.error("❌ データ送信エラー:", error));
+      // 非同期に送信
+      fetch(scriptURL, { method: 'POST', body: data })
+        .then(response => console.log("✅ fetch成功"))
+        .catch(error => {
+          console.error("❌ fetchエラー:", error);
+          // alert なし：UXを壊さないため
+        });
     }
 
-    // ページを滑らかに切り替えるための専門関数
-    function switchPage(fromId, toId) {
-      const fromPage = document.getElementById(fromId);
-      const toPage = document.getElementById(toId);
+    function fadeOut(id) {
+      const el = document.getElementById(id);
+      el.style.opacity = 0;
+      // フェードアウト完了後に要素を非表示にするまでの待機時間（0.05秒）
+      setTimeout(() => el.classList.remove('active'), 500);
+    }
 
-      // 現在のページを透明にする
-      fromPage.classList.remove('active');
-      
-      // 次のページを表示する（CSSのtransition時間と合わせることで滑らかに）
-      setTimeout(() => {
-        toPage.classList.add('active');
-      }, 500); // 0.5s = 500ms
+    function fadeIn(id) {
+      const el = document.getElementById(id);
+      el.classList.add('active');
+      setTimeout(() => el.style.opacity = 1, 10);
     }
   </script>
 </body>
 </html>
+
