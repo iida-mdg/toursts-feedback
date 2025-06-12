@@ -4,7 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Crowd Feedback Survey</title>
+
+  <link rel="preload" as="image" href="https://iida-mdg.github.io/toursts-feedback/background1.jpg">
+  <link rel="preload" as="image" href="https://iida-mdg.github.io/toursts-feedback/background2.jpg">
+  <link rel="preload" as="image" href="https://iida-mdg.github.io/toursts-feedback/background3.jpg">
+  <link rel="preload" as="image" href="https://iida-mdg.github.io/toursts-feedback/background4.jpg">
+  <link rel="preload" as="image" href="https://iida-mdg.github.io/toursts-feedback/background-thankyou.jpg">
   <style>
+    /* CSSは変更ありません */
     html, body {
       margin: 0;
       padding: 0;
@@ -36,18 +43,13 @@
       opacity: 1;
       visibility: visible;
     }
-    #page1 {
-      /* スライドショーが背景になるため、ここの背景指定は不要 */
-    }
-    /* 変更点: 画面2の背景画像URLを新しい名前に変更 */
+    #page1 {}
     #page2 {
       background-image: url('https://iida-mdg.github.io/toursts-feedback/background-thankyou.jpg');
       background-position: center center;
       background-repeat: no-repeat;
       background-size: cover;
     }
-    
-    /* スライドショー用のCSS */
     .background-slideshow {
       position: absolute;
       top: 0;
@@ -66,7 +68,6 @@
       opacity: 0;
       animation-name: fadeEffect;
       animation-iteration-count: infinite;
-      /* 1枚あたり5秒 (5s * 4枚 = 20s) でループ */
       animation-duration: 20s;
     }
     @keyframes fadeEffect {
@@ -76,8 +77,6 @@
       50% { opacity: 0; }
       100% { opacity: 0; }
     }
-
-    /* 変更点: スライドショーの画像URLを確定 */
     .slide:nth-child(1) {
       background-image: url('https://iida-mdg.github.io/toursts-feedback/background1.jpg');
       animation-delay: 0s;
@@ -94,7 +93,6 @@
       background-image: url('https://iida-mdg.github.io/toursts-feedback/background4.jpg');
       animation-delay: 15s;
     }
-    /* ... これ以降のCSSは変更ありません ... */
     .overlay-box { background-color: rgba(0, 0, 0, 0.7); padding: 2rem; border-radius: 1rem; margin-bottom: 2rem; max-width: 90vw; text-align: center; }
     .question-text { color: #ffffff; font-size: 2.4em; line-height: 1.8; }
     #page2 .question-text { font-size: 3em; }
@@ -106,7 +104,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans&family=Noto+Sans+JP&family=Noto+Sans+SC&display=swap" rel="stylesheet">
 </head>
 <body ontouchstart="">
-
   <div id="page1" class="page active">
     <div class="background-slideshow">
       <div class="slide"></div>
@@ -129,7 +126,6 @@
       <button class="button btn-5" onclick="submitFeedback(5)">Too many<br />太多了<br />多すぎる</button>
     </div>
   </div>
-
   <div id="page2" class="page">
     <div class="overlay-box">
       <h2 class="question-text">
@@ -139,7 +135,6 @@
       </h2>
     </div>
   </div>
-
   <script>
     const DURATION_THANKYOU_PAGE = 2000;
     const page1 = document.getElementById('page1');
