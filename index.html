@@ -5,43 +5,81 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Crowd Feedback Survey</title>
   <style>
-    body {
+    /* 変更点: bodyとhtmlの基本設定をより安定化 */
+    html, body {
       margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100vh; /* 画面全体の高さを確保 */
+      overflow: hidden; /* スクロールバーを完全に禁止 */
       font-family: 'Noto Sans SC', 'Noto Sans JP', 'Noto Sans', sans-serif;
-      background: none;
+    }
+
+    body {
+      position: relative; /* 変更点: 子要素を絶対配置するための基準点にする */
+    }
+
+    .page {
+      /* --- 変更点: ここが最も重要な修正 --- */
+      /* ページを重ねて配置し、がたつきを無くす */
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      
+      /* ページ内のコンテンツを中央揃えにする */
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
-      text-align: center;
-    }
-    .page {
-      display: none;
-      padding: 2rem;
+
+      /* 背景画像の共通設定 */
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      background-size: cover;
+
+      /* フェードイン・アウトの設定 */
       opacity: 0;
-      /* フェードイン・アウトの速さを0.5秒に設定 */
       transition: opacity 0.5s ease;
+      /* visibilityを使うことで、非表示時に操作できなくする */
+      visibility: hidden;
     }
+
     .page.active {
-      display: block;
       opacity: 1;
+      visibility: visible;
     }
+
+    /* 変更点: 背景画像をCSSに分離して管理しやすくする */
+    #page1 {
+      background-image: url('https://iida-mdg.github.io/toursts-feedback/background1.jpg');
+    }
+
+    #page2 {
+      background-image: url('https://iida-mdg.github.io/toursts-feedback/background2.jpg');
+    }
+    
     .overlay-box {
       background-color: rgba(0, 0, 0, 0.7);
       padding: 2rem;
       border-radius: 1rem;
       margin-bottom: 2rem;
       max-width: 90vw;
+      text-align: center;
     }
+
     .question-text {
       color: #ffffff;
       font-size: 2.4em;
       line-height: 1.8;
     }
+
     #page2 .question-text {
       font-size: 3em;
     }
+
     .button-container {
       display: flex;
       gap: 15px;
@@ -52,10 +90,11 @@
       border-radius: 1rem;
       max-width: 90vw;
     }
+
     .button {
-      width: 160px; /* 回答ボタンの横幅を拡大 */
-      height: 160px; /* 回答ボタンの縦幅を拡大 */
-      font-size: 1.4em; /* 回答ボタン内の文字サイズを拡大 */
+      width: 160px;
+      height: 160px;
+      font-size: 1.4em;
       font-weight: bold;
       border: none;
       border-radius: 16px;
@@ -70,9 +109,11 @@
       flex-direction: column;
       transition: transform 0.1s ease;
     }
+
     .button:active {
       transform: scale(0.95);
     }
+
     .btn-1 { background-color: #5271ff; }
     .btn-2 { background-color: #7ed957; }
     .btn-3 { background-color: #ffde59; }
@@ -82,7 +123,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans&family=Noto+Sans+JP&family=Noto+Sans+SC&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div id="page1" class="page active" style="background: url('https://iida-mdg.github.io/toursts-feedback/background1.jpg') no-repeat center center fixed; background-size: cover;">
+  <div id="page1" class="page active">
     <div class="overlay-box">
       <h2 class="question-text">
         How crowded does it feel right now for you?<br />
@@ -99,7 +140,7 @@
     </div>
   </div>
 
-  <div id="page2" class="page" style="background: url('https://iida-mdg.github.io/toursts-feedback/background2.jpg') no-repeat center center fixed; background-size: cover;">
+  <div id="page2" class="page">
     <div class="overlay-box">
       <h2 class="question-text">
         Thank you for your feedback!<br />
@@ -111,10 +152,14 @@
 
   <script>
     // 時間設定を定数として定義
-    const DURATION_THANKYOU_PAGE = 2000;      // サンキュー画面の表示時間 (2秒)
-    const DURATION_FADE_TRANSITION = 500;   // CSSのtransitionと合わせたフェード時間 (0.5秒)
-    const DELAY_RETURN_TO_QUESTION = 200;   // 質問画面に戻る前の待ち時間 (0.2秒)
-    const FADE_IN_TRIGGER_DELAY = 10;         // fadeInを発火させるための僅かな遅延 (0.01秒)
+    const DURATION_THANKYOU_PAGE = 2000;
+    const DURATION_FADE_TRANSITION = 500;
+    const DELAY_RETURN_TO_QUESTION = 200;
+    const FADE_IN_TRIGGER_DELAY = 10;
+
+    // 変更点: 操作対象の要素を最初に取得しておく
+    const page1 = document.getElementById('page1');
+    const page2 = document.getElementById('page2');
 
     function submitFeedback(level) {
       const scriptURL = 'https://script.google.com/macros/s/AKfycbxE_jVRtnzhprzVsyzqX6APkEyAjrFI-eUjwE8X4mwIK3clJefVH4eDsuVvvjMtvDFl2A/exec';
@@ -123,13 +168,16 @@
       data.append('crowd_level', level);
 
       // UIを即座に切り替え
-      fadeOut('page1');
-      fadeIn('page2');
+      page1.classList.remove('active');
+      page2.classList.add('active');
 
       // 一定時間後にThank You画面を消し、質問画面に戻す
       setTimeout(() => {
-        fadeOut('page2');
-        setTimeout(() => fadeIn('page1'), DELAY_RETURN_TO_QUESTION);
+        page2.classList.remove('active');
+        // 遷移のアニメーションを考慮して少し待ってから戻す
+        setTimeout(() => {
+          page1.classList.add('active');
+        }, DURATION_FADE_TRANSITION + 50); // フェードアウトが終わってから表示
       }, DURATION_THANKYOU_PAGE);
 
       // Google Apps Scriptへ非同期にデータを送信
@@ -137,23 +185,11 @@
         .then(response => console.log("✅ Data sent successfully."))
         .catch(error => {
           console.error("❌ Error sending data:", error);
-          // ユーザーの操作を妨げないようにアラートは表示しない
         });
     }
 
-    function fadeOut(id) {
-      const el = document.getElementById(id);
-      el.style.opacity = 0;
-      // フェードアウトのアニメーション完了後に要素を非表示にする
-      setTimeout(() => el.classList.remove('active'), DURATION_FADE_TRANSITION);
-    }
-
-    function fadeIn(id) {
-      const el = document.getElementById(id);
-      el.classList.add('active');
-      // activeクラスを付与(display: block)した直後にopacityを変更し、transitionを発火させる
-      setTimeout(() => el.style.opacity = 1, FADE_IN_TRIGGER_DELAY);
-    }
+    // 変更点: JavaScriptでの表示切り替えをシンプルにしたため、
+    // fadeOut, fadeIn関数は不要になりました。
   </script>
 </body>
 </html>
